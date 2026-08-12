@@ -1,4 +1,4 @@
-mcp[cli]
+mcp[cli]>=1.24,<2
 langchain
 langchain-openai
-langchain-mcp-adapters
+langchain-mcp-adapters==0.3.1
