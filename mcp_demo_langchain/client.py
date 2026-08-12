@@ -1,10 +1,18 @@
 import asyncio
 import os
 import sys
+from pathlib import Path
+
+from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from pathlib import Path
+
+load_dotenv()  # Load environment variables from .env file
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 SERVER_FILE = Path(__file__).with_name("server.py")
 
@@ -43,7 +51,8 @@ async def main():
 
     model = ChatOpenAI(
         model="gpt-5.6",
-        api_key=os.environ["OPENAI_API_KEY"]
+        api_key=os.environ["OPENAI_API_KEY"],
+        use_responses_api=True,
     )
 
 
@@ -84,7 +93,15 @@ async def main():
 
     print("\nFINAL ANSWER:")
 
-    print(result["messages"][-1].content)
+    content = result["messages"][-1].content
+    if isinstance(content, list):
+        content = "\n".join(
+            block["text"]
+            for block in content
+            if isinstance(block, dict) and block.get("type") == "text"
+        )
+
+    print(content)
 
 
 if __name__ == "__main__":
